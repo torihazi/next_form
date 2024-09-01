@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { error } from "console";
 import { BaseSyntheticEvent } from "react";
 import {
   FieldErrors,
@@ -10,14 +9,22 @@ import {
 import * as z from "zod";
 
 const loginSchema = z.object({
-  name: z.string().min(1, "Required"),
-  email: z.string().min(1, "Required").email("Invalid email Address"),
+  name: z.string().min(1, "必須"),
+  email: z.string().min(1, "必須").email("形式が不正です"),
+  password: z
+    .string()
+    .min(8, "8文字以上")
+    .regex(/^[a-zA-Z0-9]+$/, "英大文字、英小文字、数字の組み合わせ"),
 });
 
 type LoginSchemaType = z.infer<typeof loginSchema>;
 
 export default function Login() {
-  const { register, handleSubmit } = useForm<LoginSchemaType>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginSchemaType>({
     mode: "onChange",
     resolver: zodResolver(loginSchema),
   });
@@ -38,8 +45,26 @@ export default function Login() {
         onSubmit={handleSubmit(onSuccess, onError)}
         className="flex flex-col gap-2"
       >
-        <input {...register("name")} className="border" />
-        <input {...register("email")} className="border" />
+        <input {...register("name")} className="border" placeholder="名前" />
+        {errors.name && (
+          <span className="text-red-500">{errors.name.message}</span>
+        )}
+        <input
+          {...register("email")}
+          className="border"
+          placeholder="メールアドレス"
+        />
+        {errors.email && (
+          <span className="text-red-500">{errors.email.message}</span>
+        )}
+        <input
+          {...register("password")}
+          className="border"
+          placeholder="パスワード"
+        />
+        {errors.password && (
+          <span className="text-red-500">{errors.password.message}</span>
+        )}
         <button className="border hover:bg-slate-300 transition-all">
           送信
         </button>
